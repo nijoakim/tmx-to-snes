@@ -51,7 +51,7 @@ args = parser.parse_args()
 # Parse .tmx file as XML data
 root = et.parse(args.filename).getroot()
 
-# Use xml data to generate files
+# Use XML data to generate files
 for layer_xml in root.iter('layer'):
 	for data_xml in layer_xml.iter('data'):
 		# Helper function
