@@ -1,2 +1,2 @@
 # tmx-to-snes
-Converts tiled Tiled tilemaps to SNES tilemaps.
+Convert Tiled tilemaps to SNES tilemaps.
