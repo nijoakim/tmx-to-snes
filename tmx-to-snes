@@ -31,7 +31,11 @@ import xml.etree.ElementTree as et
 
 # Make parser
 parser = ap.ArgumentParser(description='Converts tiled Tiled tilemaps to SNES tilemaps.')
-parser.add_argument('filename', help='.tmx file to convert.')
+parser.add_argument(
+	'filename',
+	type = str,
+	help = '.tmx file to convert.'
+)
 parser.add_argument(
 	'-s',
 	'--size',
@@ -39,6 +43,12 @@ parser.add_argument(
 	choices  = [8, 16],
 	required = True,
 	help = 'The side length of a tile in pixels.',
+)
+parser.add_argument(
+	'-o',
+	'--output-basename',
+	type = str,
+	help = 'Filename base for output files. Layer name and file extension will be appended.',
 )
 
 # Parse
@@ -72,7 +82,9 @@ for layer_xml in root.iter('layer'):
 		data_bin = bytes(map(map_funct, data_xml.text.replace('\n', '').split(',')))
 
 		# Write to output file
-		filename_out = os.path.splitext(args.filename)[0] +'.'+ layer_xml.attrib['name'] +'.map'
+		if args.output_basename is None:
+			args.output_basename = os.path.splitext(args.filename)[0]
+		filename_out = args.output_basename +'.'+ layer_xml.attrib['name'] +'.map'
 		with open(filename_out, 'wb') as file:
 			file.write(data_bin)
 			
