@@ -81,9 +81,13 @@ for layer_xml in root.iter('layer'):
 		# Convert data
 		data_bin = bytes(map(map_funct, data_xml.text.replace('\n', '').split(',')))
 
-		# Write to output file
+		# Adjust output basename
 		if args.output_basename is None:
 			args.output_basename = os.path.splitext(args.filename)[0]
+		if os.path.isdir(args.output_basename):
+			args.output_basename += '/'+ os.path.splitext(args.filename)[0].split('/')[-1]
+
+		# Write to output file
 		filename_out = args.output_basename +'.'+ layer_xml.attrib['name'] +'.map'
 		with open(filename_out, 'wb') as file:
 			file.write(data_bin)
