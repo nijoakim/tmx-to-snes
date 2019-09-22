@@ -41,8 +41,7 @@ parser.add_argument(
 	'--size',
 	type     = int,
 	choices  = [8, 16],
-	required = True,
-	help = 'The side length of a tile in pixels.',
+	help = 'Force side length of a tile in pixels instead of reading it from file.',
 )
 parser.add_argument(
 	'-o',
@@ -60,6 +59,17 @@ args = parser.parse_args()
 
 # Parse .tmx file as XML data
 root = et.parse(args.filename).getroot()
+
+# Read tile size from file
+if args.size is None:
+	tile_width  = int(root.attrib['tilewidth'])
+	tile_height = int(root.attrib['tilewidth'])
+	if tile_width != tile_height:
+		raise IOError('Tile width (%i) and height (%i) must be of the same size.' % (tile_width, tile_height))
+	else:
+		args.size = tile_width
+		if args.size not in (8, 16):
+			raise ValueError('Tile dimensions must either be 8 or 16')
 
 # Use XML data to generate files
 for layer_xml in root.iter('layer'):
