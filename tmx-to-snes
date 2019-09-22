@@ -85,7 +85,10 @@ for layer_xml in root.iter('layer'):
 		if args.output_basename is None:
 			args.output_basename = os.path.splitext(args.filename)[0]
 		if os.path.isdir(args.output_basename):
-			args.output_basename += '/'+ os.path.splitext(args.filename)[0].split('/')[-1]
+			args.output_basename = os.path.join(
+				args.output_basename,
+				os.path.split(os.path.splitext(args.filename)[0])[1],
+			)
 
 		# Write to output file
 		filename_out = args.output_basename +'.'+ layer_xml.attrib['name'] +'.map'
