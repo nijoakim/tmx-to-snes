@@ -77,17 +77,24 @@ if args.size is None:
 		if args.size not in (8, 16):
 			raise ValueError('Tile dimensions must either be 8 or 16')
 
+# Special directory file
+spec_dir_file = None
+def update_spec_dir_file():
+	global spec_dir_file, args
+	spec_dir_file = os.path.join(args.output_basename, '.tmx-to-snes-dir')
+
 # Adjust output basename
 if args.output_basename is None:
 	args.output_basename = os.path.splitext(args.filename)[0]
 	if args.directory_format:
 		args.output_basename += '.maps'
-spec_dir_file = os.path.join(args.output_basename, '.tmx-to-snes-dir')
+update_spec_dir_file()
 if os.path.isdir(args.output_basename) and not os.path.isfile(spec_dir_file): # If filename is non-special directory
 	args.output_basename = os.path.join(
 		args.output_basename,
 		os.path.split(os.path.splitext(args.filename)[0])[1],
 	)
+	update_spec_dir_file()
 
 # Directory format actions
 if args.directory_format:
