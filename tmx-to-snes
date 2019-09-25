@@ -49,6 +49,12 @@ parser.add_argument(
 	type = str,
 	help = 'Filename base for output files. Layer name and file extension will be appended.',
 )
+parser.add_argument(
+	'-d',
+	'--directory-format',
+	action = 'store_true',
+	help = 'Writes the output files in a directory specified by the output basename.',
+)
 
 # Parse
 args = parser.parse_args()
@@ -71,6 +77,39 @@ if args.size is None:
 		if args.size not in (8, 16):
 			raise ValueError('Tile dimensions must either be 8 or 16')
 
+# Adjust output basename
+if args.output_basename is None:
+	args.output_basename = os.path.splitext(args.filename)[0]
+	if args.directory_format:
+		args.output_basename += '.maps'
+spec_dir_file = os.path.join(args.output_basename, '.tmx-to-snes-dir')
+if os.path.isdir(args.output_basename) and not os.path.isfile(spec_dir_file): # If filename is non-special directory
+	args.output_basename = os.path.join(
+		args.output_basename,
+		os.path.split(os.path.splitext(args.filename)[0])[1],
+	)
+
+# Directory format actions
+if args.directory_format:
+	# Make special directory
+	try:
+		os.mkdir(args.output_basename)
+	except FileExistsError:
+		# Touch if is special directory
+		if os.path.isfile(spec_dir_file):
+			os.utime(args.output_basename)
+	try:
+		os.mknod(spec_dir_file, mode=0o777)
+	except FileExistsError:
+		# Touch special directory file
+		os.utime(spec_dir_file)
+
+	# Adjust output basename
+	args.output_basename = os.path.join(args.output_basename, '')
+else:
+	# Adjust output basename
+	args.output_basename += '.'
+
 # Use XML data to generate files
 for layer_xml in root.iter('layer'):
 	for data_xml in layer_xml.iter('data'):
@@ -91,17 +130,8 @@ for layer_xml in root.iter('layer'):
 		# Convert data
 		data_bin = bytes(map(map_funct, data_xml.text.replace('\n', '').split(',')))
 
-		# Adjust output basename
-		if args.output_basename is None:
-			args.output_basename = os.path.splitext(args.filename)[0]
-		if os.path.isdir(args.output_basename):
-			args.output_basename = os.path.join(
-				args.output_basename,
-				os.path.split(os.path.splitext(args.filename)[0])[1],
-			)
-
 		# Write to output file
-		filename_out = args.output_basename +'.'+ layer_xml.attrib['name'] +'.map'
+		filename_out = args.output_basename
+		filename_out += layer_xml.attrib['name'] +'.map'
 		with open(filename_out, 'wb') as file:
 			file.write(data_bin)
-			
