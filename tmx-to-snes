@@ -77,44 +77,38 @@ if args.size is None:
 		if args.size not in (8, 16):
 			raise ValueError('Tile dimensions must either be 8 or 16')
 
-# Special directory file
-spec_dir_file = None
-def update_spec_dir_file():
-	global spec_dir_file, args
-	spec_dir_file = os.path.join(args.output_basename, '.tmx-to-snes-dir')
-
-# Adjust output basename
+# Default output basename
 if args.output_basename is None:
 	args.output_basename = os.path.splitext(args.filename)[0]
-	if args.directory_format:
-		args.output_basename += '.maps'
-update_spec_dir_file()
-if os.path.isdir(args.output_basename) and not os.path.isfile(spec_dir_file): # If filename is non-special directory
+
+# Adjust output basename in case of (non-.maps) directory
+if  os.path.isdir(args.output_basename) \
+and os.path.splitext(args.output_basename)[1] != '.maps':
 	args.output_basename = os.path.join(
 		args.output_basename,
 		os.path.split(os.path.splitext(args.filename)[0])[1],
 	)
-	update_spec_dir_file()
 
-# Directory format actions
+# Directory format
 if args.directory_format:
-	# Make special directory
+	# Add extension if it is missing
+	if os.path.splitext(args.output_basename)[1] != '.maps':
+		args.output_basename += '.maps'
+
+	# Make .maps directory
 	try:
 		os.mkdir(args.output_basename)
-	except FileExistsError:
-		# Touch if is special directory
-		if os.path.isfile(spec_dir_file):
-			os.utime(args.output_basename)
-	try:
-		os.mknod(spec_dir_file, mode=0o777)
-	except FileExistsError:
-		# Touch special directory file
-		os.utime(spec_dir_file)
 
-	# Adjust output basename
+	# Touch if already exists
+	except FileExistsError:
+		os.utime(args.output_basename)
+
+	# Add '/' to output basename
 	args.output_basename = os.path.join(args.output_basename, '')
+
+# File format
 else:
-	# Adjust output basename
+	# Add '.' to output basename
 	args.output_basename += '.'
 
 # Use XML data to generate files
