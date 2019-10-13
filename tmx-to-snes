@@ -81,7 +81,7 @@ if args.size is None:
 if args.output_basename is None:
 	args.output_basename = os.path.splitext(args.filename)[0]
 
-# Adjust output basename in case of (non-.maps) directory
+# Adjust output basename in case of (non-'.maps') directory
 if  os.path.isdir(args.output_basename) \
 and os.path.splitext(args.output_basename)[1] != '.maps':
 	args.output_basename = os.path.join(
